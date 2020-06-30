@@ -1,0 +1,164 @@
+---
+title: "GDAT 622 Investigation 5"
+author: "Pavan Hothi"
+date: "6/29/2020"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+{
+  c("conflicted",   
+    "data.table",    
+    "dplyr",         
+    "drat",          
+    "dtplyr",       
+    "here",
+    "igraph",       
+    "igraphdata",    
+    "intergraph",    
+    "NetData",      
+    "statnet"        
+  ) -> package_names
+  
+  for (package_name in package_names) {
+    if (!is.element(package_name, installed.packages()[, 1])) {
+      install.packages(package_name,
+                       repos = "http://cran.mtu.edu/")
+    }
+    library(
+      package_name,
+      character.only = TRUE,
+      quietly = TRUE,
+      verbose = FALSE
+    )
+  }
+  rm(list = c("package_name", "package_names"))
+  
+  
+  if (!is.element("networkdata", installed.packages()[, 1])) {
+    addRepo("schochastics")
+    install.packages("networkdata")
+  }
+  library(
+    "networkdata",
+    character.only = TRUE,
+    quietly = TRUE,
+    verbose = FALSE
+  )
+}
+
+set_here()
+
+
+options(show.signif.stars = FALSE)
+options(digits = 4)
+```
+
+
+
+
+
+```{r}
+fread("C:/Users/pavan/Documents/amazon-2003-03-02.txt") -> amazon
+str(amazon)
+
+```
+
+
+
+
+```{r}
+#Get rid of "0" ID entries
+
+paste0("z", amazon$V1) -> amazon$V1
+paste0("z", amazon$`FromNodeId ToNodeId`) -> amazon$`FromNodeId ToNodeId`
+
+
+```
+
+
+
+
+```{r}
+graph.data.frame(amazon, directed=T) -> amazon_graph
+
+plot(amazon_graph)
+
+
+```
+
+
+
+
+```{r}
+asNetwork(amazon_graph) -> amazon_net
+
+plot(amazon_net, displaylabels = TRUE, boxed.labels = FALSE,
+     label.cex = 0.75, pad = 1, main = "Amazon")
+
+
+
+```
+
+
+
+
+```{r}
+kcores(amazon_net) -> amazon_k
+amazon_k
+#Several groups
+```
+
+
+
+
+```{r}
+#cluster_louvain(amazon_graph)
+
+
+```
+
+
+
+```{r}
+transitivity(amazon_graph)
+
+
+```
+Transitivity of 0.2361. Strong Triadic closure may not occur due to lower transitivty. 
+
+
+
+
+```{r}
+triad_census(amazon_graph)
+
+```
+
+
+
+
+```{r}
+centr_betw(amazon_graph) ->  amazon_graph$betw
+centr_degree(amazon_graph) ->  amazon_graph$deg
+
+
+```
+
+
+
+
+```{r}
+
+ergm(amazon_net ~ edges) -> amazon_ergm
+summary(amazon_ergm)
+anova(amazon_ergm)
+
+
+```
+
+
+
+
